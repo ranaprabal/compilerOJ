@@ -52,7 +52,8 @@ const executePy = async (req, res) => {
   try {
     const result = await new Promise((resolve, reject) => {
       exec(
-        input ? `echo ${input} | ${outputFilePath}` : `${outputFilePath}`,
+        input ? `chmod +x ${outputFilePath} &&
+echo ${input} | python3 ${outputFilePath}` : `chmod +x ${outputFilePath} && python3 ${outputFilePath}`,
         { timeout: 2000 },
         (error, stdout, stderr) => {
           if (error) {
@@ -94,15 +95,17 @@ const executeJava = async (req, res) => {
   const { input, outputFilePath } = req.body
 
   // Extract directory and class name
-  const outputDir = path.dirname(outputFilePath)
-  const className = path.basename(outputFilePath, ".class")
-
+  const outputDir2 = path.dirname(outputFilePath)
+  const classNameWithExt = path.basename(outputFilePath)
+  const className = classNameWithExt.split('.')[0];
+  const outputDir = outputDir2.substr(1)
+  
   try {
     const result = await new Promise((resolve, reject) => {
       exec(
         input
-          ? `echo ${input} | java -cp "${outputDir}" "${className}"`
-          : `java -cp "${outputDir}" "${className}"`,
+          ? `echo ${input} | java -cp ${outputDir} ${className}`
+          : `java -cp ${outputDir} ${className}`,
         { timeout: 2000 },
         (error, stdout, stderr) => {
           if (error) {
